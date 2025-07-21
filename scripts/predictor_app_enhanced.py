@@ -25,6 +25,33 @@ smile = Smile(
     feature_level=FeatureLevel.Functionals
 )
 
+def classify_risk(probability):
+    """Map predicted probability to risk levels with visual indicators"""
+    if probability < 0.3:
+        return {
+            "level": "Low Risk",
+            "emoji": "🟢",
+            "color": "#2ECC71",
+            "description": "Voice patterns suggest normal respiratory health",
+            "recommendation": "Continue maintaining good vocal hygiene and healthy habits"
+        }
+    elif probability < 0.7:
+        return {
+            "level": "Moderate Risk", 
+            "emoji": "🟡",
+            "color": "#F39C12",
+            "description": "Some concerning voice patterns detected",
+            "recommendation": "Monitor symptoms and consider consulting healthcare provider if persistent"
+        }
+    else:
+        return {
+            "level": "High Risk",
+            "emoji": "🔴", 
+            "color": "#E74C3C",
+            "description": "Voice patterns suggest potential respiratory issues",
+            "recommendation": "Strongly recommend consultation with healthcare professional for proper evaluation"
+        }
+
 def load_model(model_type="balanced"):
     """Load the specified model type"""
     if model_type == "balanced":
@@ -134,47 +161,54 @@ def create_voice_visualizations(audio_path):
         print(f"Visualization error: {e}")
         return None
 
-def create_simple_results_chart(prediction, confidence, probabilities):
-    """Create a simple, clear results visualization"""
+def create_simple_results_chart(prediction, confidence, probabilities, risk_info):
+    """Create a simple, clear results visualization with risk levels"""
     try:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
         fig.suptitle('🏥 Your Health Analysis Results', fontsize=18, fontweight='bold')
         
-        # 1. Health Status with confidence
-        if prediction == "healthy":
-            main_color = '#2ECC71'  # Green
-            status_text = 'Healthy'
-            emoji = '✅'
-        else:
-            main_color = '#E74C3C'  # Red
-            status_text = 'Needs Attention'
-            emoji = '⚠️'
+        # 1. Risk Level Gauge
+        risk_level = risk_info["level"]
+        risk_emoji = risk_info["emoji"]
+        risk_color = risk_info["color"]
         
-        # Confidence gauge
-        confidence_pct = confidence * 100
-        remaining = 100 - confidence_pct
+        # Create risk level pie chart
+        if "Low" in risk_level:
+            risk_pct = 100 - (probabilities[1] * 100)
+            colors = [risk_color, '#BDC3C7']
+            labels = ['Healthy Pattern', 'Uncertainty']
+        elif "Moderate" in risk_level:
+            risk_pct = probabilities[1] * 100
+            colors = [risk_color, '#BDC3C7']
+            labels = ['Moderate Risk', 'Low Risk']
+        else:  # High Risk
+            risk_pct = probabilities[1] * 100
+            colors = [risk_color, '#BDC3C7']
+            labels = ['High Risk', 'Other']
         
-        wedges, texts, autotexts = ax1.pie([confidence_pct, remaining], 
-                                          labels=['Confidence', 'Uncertainty'],
-                                          colors=[main_color, '#BDC3C7'],
-                                          autopct='%1.0f%%',
+        remaining = 100 - risk_pct
+        wedges, texts, autotexts = ax1.pie([risk_pct, remaining], 
+                                          labels=labels,
+                                          colors=colors,
+                                          autopct='%1.1f%%',
                                           startangle=90,
-                                          textprops={'fontsize': 12, 'fontweight': 'bold'})
+                                          textprops={'fontsize': 11, 'fontweight': 'bold'})
         
-        ax1.set_title(f'{emoji} Predicted Status: {status_text}\nConfidence Level', 
+        ax1.set_title(f'{risk_emoji} Risk Assessment\n{risk_level}', 
                      fontsize=14, fontweight='bold', pad=20)
         
-        # 2. Probability breakdown
+        # 2. Probability Score Display
+        unhealthy_prob = probabilities[1] * 100
         healthy_prob = probabilities[0] * 100
-        positive_prob = probabilities[1] * 100
         
-        categories = ['Healthy\nVoice Pattern', 'Concerning\nVoice Pattern']
-        values = [healthy_prob, positive_prob]
+        categories = ['Healthy\nPattern', 'Concerning\nPattern']
+        values = [healthy_prob, unhealthy_prob]
         colors = ['#2ECC71', '#E74C3C']
         
         bars = ax2.bar(categories, values, color=colors, alpha=0.8, width=0.6)
         ax2.set_ylim(0, 100)
-        ax2.set_title('📊 Detailed Probability Breakdown', fontsize=14, fontweight='bold', pad=20)
+        ax2.set_title(f'📊 Prediction Score: {unhealthy_prob:.2f}%\nDetailed Probability Breakdown', 
+                     fontsize=14, fontweight='bold', pad=20)
         ax2.set_ylabel('Probability (%)', fontsize=12)
         
         # Add percentage labels on bars
@@ -183,6 +217,32 @@ def create_simple_results_chart(prediction, confidence, probabilities):
             ax2.text(bar.get_x() + bar.get_width()/2., height + 1,
                     f'{value:.1f}%', ha='center', va='bottom', 
                     fontsize=12, fontweight='bold')
+        
+        # 3. Risk Level Visual Guide
+        risk_levels = ['Low Risk\n(0-30%)', 'Moderate Risk\n(30-70%)', 'High Risk\n(70-100%)']
+        risk_colors = ['#2ECC71', '#F39C12', '#E74C3C']
+        current_score = unhealthy_prob
+        
+        # Create horizontal bar showing where current score falls
+        y_pos = [0, 1, 2]
+        bars = ax3.barh(y_pos, [30, 40, 30], left=[0, 30, 70], 
+                       color=risk_colors, alpha=0.7, height=0.6)
+        
+        # Add current score marker
+        ax3.axvline(x=current_score, color='black', linewidth=3, linestyle='--')
+        ax3.text(current_score, 2.5, f'Your Score\n{current_score:.1f}%', 
+                ha='center', fontweight='bold', fontsize=11,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+        
+        ax3.set_yticks(y_pos)
+        ax3.set_yticklabels(risk_levels)
+        ax3.set_xlim(0, 100)
+        ax3.set_xlabel('Risk Score (%)', fontsize=12)
+        ax3.set_title('🎯 Risk Level Guide\n(Where You Stand)', 
+                     fontsize=14, fontweight='bold', pad=20)
+        
+        # Add grid for easier reading
+        ax3.grid(True, alpha=0.3, axis='x')
         
         plt.tight_layout()
         
@@ -224,21 +284,37 @@ def predict_health(audio, model_type):
         prediction = model.predict(features_scaled)[0]
         proba = model.predict_proba(features_scaled)[0]
         confidence = np.max(proba)
+        
+        # Get the probability of unhealthy pattern (assuming [0]=healthy, [1]=unhealthy)
+        unhealthy_probability = proba[1]
+        
+        # Classify risk level based on probability
+        risk_info = classify_risk(unhealthy_probability)
 
-        # Create results visualization
-        results_chart = create_simple_results_chart(prediction, confidence, proba)
+        # Create results visualization with risk information
+        results_chart = create_simple_results_chart(prediction, confidence, proba, risk_info)
 
-        # Format the result in simple, clear language
-        if prediction == "healthy":
-            status_message = "🎉 Your voice shows healthy patterns!"
-            health_advice = "Your voice analysis suggests normal respiratory health. Keep maintaining good vocal hygiene!"
+        # Format the result with risk-based messaging
+        risk_level = risk_info["level"]
+        risk_emoji = risk_info["emoji"] 
+        risk_description = risk_info["description"]
+        risk_recommendation = risk_info["recommendation"]
+        
+        # Create status message based on risk level
+        if "Low" in risk_level:
+            status_message = f"🎉 {risk_emoji} {risk_level} - Your voice shows healthy patterns!"
+            health_advice = risk_recommendation
             status_emoji = "✅"
-            confidence_level = "High" if confidence > 0.8 else "Good" if confidence > 0.6 else "Moderate"
-        else:
-            status_message = "⚠️ Your voice shows some concerning patterns"
-            health_advice = "Your voice analysis detected patterns that may indicate respiratory issues. Consider consulting a healthcare professional for a proper evaluation."
-            status_emoji = "⚠️"
-            confidence_level = "High" if confidence > 0.8 else "Good" if confidence > 0.6 else "Moderate"
+        elif "Moderate" in risk_level:
+            status_message = f"⚠️ {risk_emoji} {risk_level} - Some patterns need attention"
+            health_advice = risk_recommendation
+            status_emoji = "🟡"
+        else:  # High Risk
+            status_message = f"🚨 {risk_emoji} {risk_level} - Important patterns detected"
+            health_advice = risk_recommendation
+            status_emoji = "🔴"
+            
+        confidence_level = "High" if confidence > 0.8 else "Good" if confidence > 0.6 else "Moderate"
         
         # Model explanation in simple terms
         model_explanation = {
@@ -246,15 +322,17 @@ def predict_health(audio, model_type):
             "original": "📊 Standard AI Model - Good Performance (81.4% success rate)"
         }
         
-        # Create detailed, user-friendly results
+        # Create detailed, user-friendly results with risk information
         detailed_results = {
-            "🏥 Health Assessment": f"{status_emoji} {prediction.title()} Voice Pattern",
+            "🩺 Prediction Score": f"{unhealthy_probability:.3f} ({unhealthy_probability*100:.1f}%)",
+            "🎯 Risk Assessment": f"{risk_emoji} {risk_level}",
             "📊 Confidence Level": f"{confidence_level} ({confidence * 100:.1f}% certain)",
-            "🎯 What This Means": status_message,
-            "💡 Health Advice": health_advice,
+            "🔍 What This Means": risk_description,
+            "💡 Health Recommendation": risk_recommendation,
             "🤖 AI Model Used": model_explanation[model_type],
             "🔬 Voice Features Analyzed": f"{features_df.shape[1]} different voice characteristics",
-            "📈 Detailed Breakdown": f"Healthy Pattern: {proba[0]*100:.1f}% | Concerning Pattern: {proba[1]*100:.1f}%"
+            "📈 Detailed Breakdown": f"Healthy Pattern: {proba[0]*100:.1f}% | Concerning Pattern: {proba[1]*100:.1f}%",
+            "⚕️ Medical Note": "This is a screening tool - consult healthcare provider for medical diagnosis"
         }
 
         return detailed_results, voice_viz, results_chart
@@ -272,12 +350,14 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
     
     # Header with clear, friendly language
     gr.Markdown("""
-    # 🎤 VoiceVitals: Your Personal Voice Health Scanner
-    ### Simple AI-powered health screening through your voice
+    # 🎤 VoiceVitals: AI-Powered Voice Health Risk Scanner
+    ### Advanced health screening with intelligent risk assessment
     
-    **How it works:** Just record yourself saying "ahhh" for 2-3 seconds, and our AI will analyze your voice for health patterns.
+    **How it works:** Record yourself saying "ahhh" for 2-3 seconds, and our AI will analyze your voice patterns and provide a risk-based health assessment with color-coded results.
     
-    💡 **Perfect for:** Regular health monitoring, early screening, peace of mind
+    💡 **Perfect for:** Regular health monitoring, early screening, risk assessment, peace of mind
+    
+    🎯 **Risk Levels:** 🟢 Low Risk (0-30%) | 🟡 Moderate Risk (30-70%) | 🔴 High Risk (70-100%)
     """)
     
     # Input section with clear instructions
@@ -315,7 +395,7 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
         with gr.Column(scale=1):
             # Main results
             results_output = gr.JSON(
-                label="📋 Your Health Analysis Report",
+                label="🎯 Risk-Based Health Analysis Report",
                 show_label=True
             )
             
@@ -359,6 +439,11 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
         
         ### 📊 Understanding Your Results
         **What the scores mean:**
+        - **Prediction Score**: Raw probability (0.000-1.000) of concerning patterns
+        - **Risk Assessment**: Color-coded risk level based on probability thresholds
+          - 🟢 **Low Risk** (0-30%): Voice patterns suggest normal health
+          - 🟡 **Moderate Risk** (30-70%): Some concerning patterns detected  
+          - 🔴 **High Risk** (70-100%): Significant patterns suggest medical consultation
         - **Confidence Level**: How sure the AI is about its assessment
         - **Voice Pattern**: Whether your voice shows healthy or concerning patterns
         - **Probability Breakdown**: Detailed percentages for each possibility
