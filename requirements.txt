@@ -1,0 +1,34 @@
+# VoiceVitals: AI Voice Health Analysis System
+# Core Dependencies for Voice Feature Extraction and Machine Learning
+
+# Web Interface
+gradio>=4.0.0
+
+# Voice Feature Extraction
+opensmile>=2.4.2
+
+# Machine Learning & Data Science
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+imbalanced-learn>=0.11.0
+joblib>=1.3.0
+
+# Audio Processing
+librosa>=0.10.0
+soundfile>=0.12.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Explainable AI
+shap>=0.42.0
+
+# Utilities
+tqdm>=4.65.0
+warnings
+
+# Optional: Jupyter notebook support
+# jupyter>=1.0.0
+# ipykernel>=6.0.0

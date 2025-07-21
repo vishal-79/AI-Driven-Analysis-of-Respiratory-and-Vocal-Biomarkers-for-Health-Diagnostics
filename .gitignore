@@ -1,0 +1,106 @@
+# ====================
+# Python Bytecode
+# ====================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ====================
+# Virtual Environments
+# ====================
+env/
+venv/
+.venv/
+.Python
+
+# ====================
+# Development Logs & Caches
+# ====================
+*.log
+*.tmp
+*.bak
+*.backup
+.cache/
+.mypy_cache/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.coverage*
+.hypothesis/
+
+# ====================
+# Jupyter Notebook
+# ====================
+.ipynb_checkpoints/
+
+# ====================
+# IDE & Editor Settings
+# ====================
+.vscode/
+.idea/
+*.swo
+*.swp
+*~
+
+# ====================
+# OS Files
+# ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ====================
+# Git
+# ====================
+.git/
+
+# ====================
+# Datasets
+# ====================
+datasets/
+Data/features/
+Data/samples/
+*.tar.gz*
+*.csv
+*.tsv
+
+# ====================
+# Audio & Media Files
+# ====================
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# ====================
+# ML Model Files
+# ====================
+models/*.joblib
+models/*.pkl
+models/*.h5
+models/*.pt
+models/*.onnx
+
+# ====================
+# Temporary Output Files
+# ====================
+temp_*.png
+voice_analysis_dashboard.png
+health_results_chart.png
+
+# ====================
+# Extracted or Generated Data
+# ====================
+datasets/Coswara/Extracted_data/
+datasets/Coswara/technical_validation/
