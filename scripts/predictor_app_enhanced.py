@@ -7,18 +7,8 @@ import joblib
 import pandas as pd
 import numpy as np
 from opensmile import Smile, FeatureSet, FeatureLevel
-import matplotlib.pyp        with gr.Column(scale=2):
-            audio_input = gr.Audio(
-                type="filepath", 
-                label="🎙️ Record Your Voice - Say 'ahhh' clearly for 2-3 seconds"
-            )
-            gr.Markdown("""
-            **📝 Recording Tips:**
-            - Find a quiet space
-            - Hold the 'ahhh' sound steady for 2-3 seconds  
-            - Speak at normal volume (not too loud or too soft)
-            - Make sure your microphone is working
-            """)mport seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 import librosa
 import librosa.display
 import os
@@ -26,7 +16,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Set professional styling
-plt.style.use('seaborn-v0_8')
+plt.style.use('default')
 sns.set_palette("husl")
 
 # === Setup OpenSMILE extractor ===
@@ -295,8 +285,7 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
         with gr.Column(scale=2):
             audio_input = gr.Audio(
                 type="filepath", 
-                label="�️ Record Your Voice",
-                info="Say 'ahhh' clearly for 2-3 seconds (like when the doctor checks your throat)"
+                label="🎙️ Record Your Voice - Say 'ahhh' clearly for 2-3 seconds"
             )
             gr.Markdown("""
             **📝 Recording Tips:**
@@ -310,8 +299,7 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
             model_selector = gr.Radio(
                 choices=["balanced", "original"], 
                 value="balanced",
-                label="🤖 AI Model Choice",
-                info="Balanced model is more accurate for most people"
+                label="🤖 AI Model Choice"
             )
             gr.Markdown("""
             **🎯 Model Guide:**
@@ -327,7 +315,7 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
         with gr.Column(scale=1):
             # Main results
             results_output = gr.JSON(
-                label="� Your Health Analysis Report",
+                label="📋 Your Health Analysis Report",
                 show_label=True
             )
             
@@ -354,14 +342,14 @@ with gr.Blocks(title="VoiceVitals: AI Health Scanner", theme=gr.themes.Soft()) a
         - If you have health concerns, please consult a healthcare professional
         - Use this for general awareness and monitoring only
         
-        ### � How Our AI Works
+        ### 🔬 How Our AI Works
         **Simple explanation:**
         - Our AI was trained on thousands of voice recordings
         - It learned to recognize patterns in healthy vs. concerning voices
         - The analysis looks at 88 different voice characteristics
         - Higher confidence means the AI is more certain about its assessment
         
-        ### �️ Best Recording Practices
+        ### 🎙️ Best Recording Practices
         **For the most accurate results:**
         - Record in a quiet room
         - Use a good quality microphone if possible

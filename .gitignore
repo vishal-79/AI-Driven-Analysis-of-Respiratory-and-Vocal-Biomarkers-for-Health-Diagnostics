@@ -61,27 +61,34 @@ Thumbs.db
 .git/
 
 # ====================
-# Datasets
+# Large Datasets (Keep sample data)
 # ====================
-datasets/
-Data/features/
-Data/samples/
+datasets/Coswara/
+!datasets/Coswara/README.md
+!datasets/Coswara/LICENSE.md
+!datasets/Coswara/extract_data.py
+!datasets/Coswara/csv_labels_legend.json
+
+# Exclude large compressed files
 *.tar.gz*
-*.csv
-*.tsv
+
+# Exclude large CSV files but keep small ones
+datasets/**/*.csv
+!data/features/recorded_features.csv
 
 # ====================
-# Audio & Media Files
+# Large Audio Files (Keep samples)
 # ====================
-*.wav
-*.mp3
-*.flac
-*.ogg
-*.m4a
-*.mp4
-*.avi
-*.mov
-*.mkv
+# Exclude large audio files but keep samples
+datasets/**/*.wav
+datasets/**/*.mp3
+datasets/**/*.flac
+datasets/**/*.ogg
+datasets/**/*.m4a
+
+# Keep sample audio files
+!data/samples/*.wav
+!data/samples/*.mp3
 
 # ====================
 # ML Model Files
